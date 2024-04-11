@@ -1,0 +1,132 @@
+import sqlite3 as conector
+
+#criar tabela cliente
+def criar_tabela_cliente():
+    #abertura da conexao
+    try:
+        conexao = conector.connect("C:/Banco_Aplicat_Python/trabalhoPy.db")
+        cursor = conexao.cursor()
+        print('Conexao com o bando de dados realizado com sucesso!')
+    
+        sql1 = '''CREATE TABLE IF NOT EXISTS cliente(
+                    cpf INTEGER PRIMARY KEY NOT NULL,
+                    nome TEXT NOT NULL,
+                    telefone TEXT NOT NULL,
+                    data_nascimento DATE NOT NULL,
+                    endereço TEXT NOT NULL, 
+                    picture TEXT NOT NULL
+                    );'''
+        sql2 = '''CREATE TABLE IF NOT EXISTS categoria(
+                    nome INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    );'''
+        sql3 = '''CREATE TABLE IF NOT EXISTS produto(
+                    id INTEGER NOT NULL,
+                    nome TEXT NOT NULL,
+                    preço FLOAT NOT NULL,
+                    PRIMARY KEY (id),
+                    FOREING KEY(cliente) REFERENCES cliente(cpf),
+                    FOREING KEY(categoria) REFERENCES categoria(nome)
+                    );'''
+        cursor.execute(sql1)
+        cursor.execute(sql2)
+        cursor.execute(sql3)
+        conexao.commit()
+        print('Tabelas foram criadas com sucesso!')
+
+    except conector.DatabaseError as err:
+        print('erro ao conectar com o banco de dados: ', err)
+
+    finally:
+        if(conexao):    
+            cursor.close()
+            conexao.close()
+
+#registrar novos clientes
+def registrar_clientes():
+    try:
+        conexao = conector.connect("C:/Banco_Aplicat_Python/trabalhoPy.db")
+        cursor = conexao.cursor()
+        print('Conexao com o bando de dados realizado com sucesso!')
+        sql = '''INSERT INTO cliente(
+                    cpf, 
+                    nome, 
+                    telefone, 
+                    data_nascimento, 
+                    endereço, 
+                    picture) VALUES (?,?,?,?,?,?);'''
+        cursor.execute(sql)
+        print('cliente cadastrado com sucesso!')
+        conexao.commit()
+    except conector.DatabaseError as err:
+        print('Erro ao cadastrar cliente! ', err)
+    finally:
+        if(conexao):
+            cursor.close()
+            conexao.close()
+
+#alterar dados
+def alterar_dados():
+    try:
+        conexao = conector.connect("C:/Banco_Aplicat_Python/trabalhoPy.db")
+        cursor = conexao.cursor()
+
+        comando1 = 'UPDATE cliente SET telefone=? WHERE cpf=:cpf;'
+        cursor.execute(comando1,(True,))
+
+        conexao.commit()
+        print('Dados alterados')
+    except conector.DatabaseError as err:
+        print('Erro ao alterar dados! ', err)
+    finally:
+        if(conexao):
+            cursor.close()
+            conexao.close()
+
+#excluindo dados
+def excluir_dados():
+    try:
+        conexao = conector.connect("C:/Banco_Aplicat_Python/trabalhoPy.db")
+        cursor = conexao.cursor()
+        comando = 'DELETE FROM cliente WHERE cpf=12345678900;'
+        cursor.execute(comando)
+        conexao.commit()
+        print('Excluido com sucesso')
+    except conector.DatabaseError as err:
+        print('Erro ao excluir! ', err)
+    finally:
+        if(conexao):
+            cursor.close()
+            conexao.close()
+
+#listando os clientes
+def listar_clientes():
+    try:
+        conexao = conector.connect("C:/Banco_Aplicat_Python/trabalhoPy.db")
+        cursor = conexao.cursor()
+        print('Conexão com o banco de dados realizada com sucesso!')
+    
+        #execução de comandos sql
+        sql = '''SELECT * FROM cliente;'''
+        cursor.execute(sql)
+        #recuperação de dados
+        registros = cursor.fetchall()
+        print('Tipo retornado: ', type(registros))
+
+        #saída de dados sem formatação
+        for reg in registros:
+            cpf, nome, telefone, data_nascimento, endereço, picture = reg
+            print('CPF: ',cpf,'Nome: ',nome,'Telefone: ',telefone,'Data de nascimento: ',data_nascimento,'Endereço: ',endereço,'Foto: ',picture)
+    except conector.DatabaseError as err:
+        print('Erro ao mostrar lista', err)
+    finally:
+        if(conexao):
+            cursor.close()
+            conexao.close()
+
+#executando as funções
+criar_tabela_cliente()
+registrar_clientes()
+alterar_dados()
+excluir_dados()
+listar_clientes()
+print('concluido')
